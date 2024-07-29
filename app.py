@@ -7,8 +7,8 @@ from PIL import Image
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import io
 import gdown
+import os
 
 # Download the models
 @st.cache_resource
@@ -33,9 +33,9 @@ class BreastPipeline:
         # Define the transformations
         self.transform = transforms.Compose([
             transforms.Resize(size=(128, 128)),
-            transforms.RandomHorizontalFlip(p=0.2),
             transforms.ToTensor()
         ])
+
     def preprocess(self, image_path):
         image = Image.open(image_path).convert('RGB')
         return self.transform(image).unsqueeze(0).to(self.device)
@@ -44,9 +44,9 @@ class BreastPipeline:
         with torch.no_grad():
             output = self.model(image_tensor)
             prediction = torch.argmax(output, dim=1).item()
-        return prediction == 0  # 0 indicates a breast image
+        return prediction > 0.5  # 0 indicates a breast image
 
-    def detect_amd(self, image_tensor):
+    def detect_cancer(self, image_tensor):
         with torch.no_grad():
             output = self.b_model(image_tensor)
             probabilities = F.softmax(output, dim=1)
@@ -121,12 +121,11 @@ class BreastPipeline:
     def run(self, image_path):
         image_tensor = self.preprocess(image_path)
         if self.is_b_image(image_tensor):
-            amd_result, confidence = self.detect_amd(image_tensor)
-            result_text = "Benign" if amd_result == 0 else "Malignant"
+            cancer_result, confidence = self.detect_cancer(image_tensor)
+            result_text = "Benign" if cancer_result == 0 else "Malignant"
             return f"{result_text} with probability {confidence:.4f}", True
         else:
             return "Not a Breast Image", False
-       
 
 @st.cache_resource
 def load_pipeline():
@@ -163,6 +162,18 @@ def show_breast_cancer_info():
     """)
 
 def main():
+    st.set_page_config(page_title="Breast Image Analysis", page_icon=":microscope:", layout="wide", initial_sidebar_state="expanded")
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #ffe6f2;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
     st.title("Breast Image Analysis and Cancer Information")
 
     # Add a navigation menu
