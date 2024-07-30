@@ -15,13 +15,8 @@ def download_models():
     gdown.download('https://drive.google.com/uc?id=1f9TQHMSEqr7_5rsPFUH9z3tPLtWc_zpT', 'Breast-Model.pth', quiet=True)
 
 class BreastPipeline:
-    def __init__(self, binary_model_path, b_model_path):
+    def __init__(self, b_model_path):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        # Load the binary classifier model
-        self.model = torch.load(binary_model_path, map_location=self.device)
-        self.model = self.model.to(self.device)
-        self.model.eval()
 
         # Load the Breast detection model
         self.b_model = torch.load(b_model_path, map_location=self.device)
@@ -55,7 +50,7 @@ class BreastPipeline:
 @st.cache_resource
 def load_pipeline():
     download_models()
-    return BreastPipeline(binary_model_path='Breast-Or-Not-Model.pth', b_model_path='Breast-Model.pth')
+    return BreastPipeline(b_model_path='Breast-Model.pth')
 
 def show_breast_cancer_info():
     st.header("About Breast Cancer")
@@ -117,11 +112,8 @@ def main():
                     f.write(uploaded_file.getbuffer())
 
                 # Run the pipeline
-                result, is_breast_image = pipeline.run(temp_file)
+                result = pipeline.run(temp_file)
                 st.write(result)
-
-                if not is_breast_image:
-                    st.write("Grad-CAM visualization is not available for non-breast images.")
 
         st.warning("Remember: This tool is for educational purposes only. Always consult with a healthcare professional for medical advice.")
 
