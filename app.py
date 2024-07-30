@@ -44,7 +44,7 @@ class BreastPipeline:
     def run(self, image_path):
         image_tensor = self.preprocess(image_path)
         cancer_result, confidence = self.detect_cancer(image_tensor)
-        result_text = "Benign" if cancer_result == 0 else "Malignant"
+        result_text = "Benign" if cancer_result == 1 else "Malignant"
         return f"{result_text} with probability {confidence:.4f}", True
 
 @st.cache_resource
