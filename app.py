@@ -42,7 +42,7 @@ class BreastPipeline:
         with torch.no_grad():
             output = self.model(image_tensor)
             prediction = torch.argmax(output, dim=1).item()
-        return prediction == 0  # 0 indicates a breast image
+        return prediction > 0.5  # 0 indicates a breast image
 
     def detect_cancer(self, image_tensor):
         with torch.no_grad():
