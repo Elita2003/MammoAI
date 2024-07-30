@@ -11,8 +11,8 @@ import os
 # Download the models
 @st.cache_resource
 def download_models():
-    gdown.download('https://drive.google.com/uc?id=12TX1C2FlErD44aLEuwQriXWavt0LpA7L', 'Breast-Or-Not-Model.pth', quiet=True)
-    gdown.download('https://drive.google.com/uc?id=1f9TQHMSEqr7_5rsPFUH9z3tPLtWc_zpT', 'Breast-Model.pth', quiet=True)
+    # gdown.download('https://drive.google.com/uc?id=12TX1C2FlErD44aLEuwQriXWavt0LpA7L', 'Breast-Or-Not-Model.pth', quiet=True)
+    gdown.download('https://drive.google.com/file/d/1u3iq638jz55CDmWeh7mCqItWW9WYgkTy', Breast-Model.pth', quiet=True)
 
 class BreastPipeline:
     def __init__(self, b_model_path):
@@ -44,7 +44,7 @@ class BreastPipeline:
     def run(self, image_path):
         image_tensor = self.preprocess(image_path)
         cancer_result, confidence = self.detect_cancer(image_tensor)
-        result_text = "Benign" if cancer_result == 1 else "Malignant"
+        result_text = "Benign" if cancer_result == 0 else "Malignant"
         return f"{result_text} with probability {confidence:.4f}", True
 
 @st.cache_resource
