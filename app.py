@@ -38,12 +38,6 @@ class BreastPipeline:
         image = Image.open(image_path).convert('RGB')
         return self.transform(image).unsqueeze(0).to(self.device)
 
-    def is_b_image(self, image_tensor):
-        with torch.no_grad():
-            output = self.model(image_tensor)
-            prediction = torch.argmax(output, dim=1).item()
-        return prediction > 0.5  # 0 indicates a breast image
-
     def detect_cancer(self, image_tensor):
         with torch.no_grad():
             output = self.b_model(image_tensor)
@@ -54,12 +48,9 @@ class BreastPipeline:
 
     def run(self, image_path):
         image_tensor = self.preprocess(image_path)
-        if self.is_b_image(image_tensor):
-            cancer_result, confidence = self.detect_cancer(image_tensor)
-            result_text = "Benign" if cancer_result == 0 else "Malignant"
-            return f"{result_text} with probability {confidence:.4f}", True
-        else:
-            return "Not a Breast Image", False
+        cancer_result, confidence = self.detect_cancer(image_tensor)
+        result_text = "Benign" if cancer_result == 0 else "Malignant"
+        return f"{result_text} with probability {confidence:.4f}", True
 
 @st.cache_resource
 def load_pipeline():
